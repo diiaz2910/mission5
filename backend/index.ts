@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 
-const app = express();
+const app: express.Application = express();
 const PORT = 3000;
 
 app.use(express.json());
@@ -19,11 +19,21 @@ const MessageSchema = new mongoose.Schema({
 const Message = mongoose.model('Message', MessageSchema);
 
 // Create a new message
-app.post('/messages', async (req, res) => {
+app.post('/messages', async (req: Request, res: Response) => {
   try {
-    const message = new Message(req.body);
-    await message.save();
-    res.status(201).json(message);
+    const { message } = req.body;
+    const newMessage = new Message({ message });
+    await newMessage.save();
+    res.status(201).json(newMessage);
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
+
+app.get('/messages', async (req: Request, res: Response) => {
+  try {
+    const messages = await Message.find();
+    res.status(200).json(messages);
   } catch (error) {
     res.status(500).json({ error: 'An error occurred' });
   }
